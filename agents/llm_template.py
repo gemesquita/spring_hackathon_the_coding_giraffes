@@ -55,7 +55,7 @@ def strategy(observation: dict, day: int) -> list[dict]:
                 {"role": "user", "content": user_msg},
             ],
             temperature=0.3,
-            max_tokens=10000,
+            max_tokens=20000,
         )
         content = response.choices[0].message.content.strip()
 

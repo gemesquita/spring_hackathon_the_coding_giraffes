@@ -232,9 +232,9 @@ SCENARIO_MULTIPLIERS = {
     "baseline": {"order": 1.0, "staff": 0, "price": 1.0},
     "renovation": {"order": 0.5, "staff": -3, "price": 0.95},
     "supply_crisis": {"order": 1.5, "staff": 0, "price": 1.0},
-    "tourist_normal": {"order": 1.0, "staff": 0, "price": 1.0},
-    "tourist_prestock": {"order": 2.5, "staff": 0, "price": 1.0},   # Days 5-8: PRE-STOCK
-    "tourist_surge": {"order": 1.0, "staff": 3, "price": 1.15},     # Days 9-14: Already stocked!
+    "tourist_normal": {"order": 1.2, "staff": 0, "price": 1.0},     # Start building stock early
+    "tourist_prestock": {"order": 2.8, "staff": 1, "price": 1.0},   # Days 5-8: HEAVY PRE-STOCK
+    "tourist_surge": {"order": 1.2, "staff": 4, "price": 1.18},     # SURGE: max staff, premium price
     "tourist_crash": {"order": 0.4, "staff": -2, "price": 0.9},     # Days 15+: Scale down
 }
 
@@ -248,8 +248,8 @@ DAY_OF_WEEK_MODIFIERS = {
     "Sunday": {"order": 0.3, "staff": 0, "price": 1.0},      # Closed - minimal
     "Monday": {"order": 1.0, "staff": 0, "price": 1.0},      # Low demand
     "Tuesday": {"order": 1.0, "staff": 0, "price": 1.0},     # Low demand
-    "Wednesday": {"order": 1.2, "staff": 0, "price": 1.0},   # Prep for weekend
-    "Thursday": {"order": 1.1, "staff": 0, "price": 1.0},    # Building up
-    "Friday": {"order": 1.0, "staff": 1, "price": 1.08},     # HIGH demand - premium
-    "Saturday": {"order": 1.0, "staff": 2, "price": 1.08},   # HIGHEST demand - premium
+    "Wednesday": {"order": 1.3, "staff": 0, "price": 1.0},   # Prep for weekend - MORE stock
+    "Thursday": {"order": 1.2, "staff": 1, "price": 1.05},   # Building up
+    "Friday": {"order": 1.0, "staff": 2, "price": 1.12},     # HIGH demand - higher premium
+    "Saturday": {"order": 1.0, "staff": 3, "price": 1.12},   # HIGHEST demand - max premium
 }

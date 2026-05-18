@@ -972,71 +972,61 @@ def detect_scenario_phase(obs: dict, day: int, notes_data: dict) -> str:
         return "supply_crisis"
     
     # =========================================================================
-    # TOURIST SEASON: Phase-based state machine with explicit transitions
+    # TOURIST SEASON: REACTIVE detection based on ACTUAL covers
     # =========================================================================
     
     # Check if we're already in tourist season (from previous day's phase)
     in_tourist = prev_phase.startswith("tourist_")
     
-    # Tourist entry requires a SUSTAINED surge — not a single Friday spike.
-    # Real tourist surge runs 300-470 covers across many days; baseline Saturday
-    # tops out around 280. Require 2 of the last 3 non-zero days to exceed 280.
-    surge_detected = False
-    if not in_tourist and day >= 9:
-        covers_hist = notes_data.get("COVERS", "").split(",")
-        try:
-            non_zero_hist = [int(c) for c in covers_hist if c.isdigit() and int(c) > 0]
-        except ValueError:
-            non_zero_hist = []
-        if covers > 0:
-            non_zero_hist = non_zero_hist + [covers]
-        last_three = non_zero_hist[-3:]
-        high_days = sum(1 for c in last_three if c > 280)
-        if high_days >= 2:
-            surge_detected = True
+    # IMMEDIATE surge detection: if yesterday's covers > 350, we're in surge NOW
+    # This catches the surge on the FIRST high day, not after 2-3 days
+    immediate_surge = covers > 350
     
-    # EXIT condition: if we somehow entered tourist mode but recent reality
-    # looks like baseline (last 2 non-zero days both < 200 covers), return to
-    # baseline immediately. Self-corrects accidental entries within ~2 days.
+    # Also check cover history for sustained high demand
+    covers_hist = notes_data.get("COVERS", "").split(",")
+    try:
+        non_zero_hist = [int(c) for c in covers_hist if c.isdigit() and int(c) > 0]
+    except ValueError:
+        non_zero_hist = []
+    if covers > 0:
+        non_zero_hist = non_zero_hist + [covers]
+    
+    # Surge detected if: immediate high covers OR 1+ of last 2 days > 300
+    last_two = non_zero_hist[-2:] if len(non_zero_hist) >= 2 else non_zero_hist
+    historical_surge = any(c > 300 for c in last_two)
+    
+    surge_detected = immediate_surge or historical_surge
+    
+    # EXIT condition: if in tourist mode but covers crashed (last 2 non-zero < 150)
     if in_tourist:
-        covers_hist = notes_data.get("COVERS", "").split(",")
-        try:
-            non_zero_hist = [int(c) for c in covers_hist if c.isdigit() and int(c) > 0]
-        except ValueError:
-            non_zero_hist = []
-        last_two = non_zero_hist[-2:]
-        if len(last_two) == 2 and all(c < 200 for c in last_two):
-            return "baseline"
+        last_two_check = non_zero_hist[-2:] if len(non_zero_hist) >= 2 else []
+        if len(last_two_check) == 2 and all(c < 150 for c in last_two_check):
+            return "tourist_crash"
+    
+    # CRASH detection: covers dropped significantly from peak
+    crash_detected = notes_data.get("CRASH_DETECTED") == "YES"
+    if not crash_detected and len(non_zero_hist) >= 3:
+        peak = max(non_zero_hist[-5:]) if len(non_zero_hist) >= 5 else max(non_zero_hist)
+        recent = non_zero_hist[-1] if non_zero_hist else 0
+        if peak > 300 and recent < peak * 0.5:
+            crash_detected = True
     
     if in_tourist or surge_detected:
-        # Check if crash was detected (from update_historical_notes)
-        crash_detected = notes_data.get("CRASH_DETECTED") == "YES"
+        # Already in crash or crash just detected
+        if crash_detected or (prev_phase == "tourist_crash"):
+            return "tourist_crash"
         
-        # We're in tourist season - determine exact phase by day number
-        if day <= 4:
+        # REAL-TIME phase based on actual demand, not just day number
+        if covers > 300 or (prev_phase == "tourist_surge" and covers > 200):
+            # High demand RIGHT NOW = surge mode
+            return "tourist_surge"
+        elif day <= 4:
             return "tourist_normal"
         elif day <= 8:
-            return "tourist_prestock"   # PRE-STOCK phase: order 2.5x
+            return "tourist_prestock"
         elif day <= 14:
-            # If crash detected early (before day 15), transition to crash
-            if crash_detected:
-                return "tourist_crash"
-            return "tourist_surge"      # SURGE phase: staff +3, DON'T over-order
+            return "tourist_surge"
         else:
-            # After day 14, default to crash phase
-            # But also check cover drop for early crash detection — filter zeros
-            # so a Sunday or stockout doesn't poison the comparison.
-            if not crash_detected:
-                covers_hist = notes_data.get("COVERS", "").split(",")
-                try:
-                    recent = [int(c) for c in covers_hist[-3:] if c.isdigit() and int(c) > 0]
-                    if len(recent) >= 2 and recent[0] > 0 and recent[-1] > 0:
-                        if recent[-1] < recent[0] * 0.6:
-                            crash_detected = True
-                except (ValueError, IndexError):
-                    pass
-            
-            # Default to crash after day 14
             return "tourist_crash"
     
     # =========================================================================
