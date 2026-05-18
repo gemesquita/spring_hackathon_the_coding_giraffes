@@ -283,3 +283,114 @@ Server:    http://52.48.183.209:8001
   Day 30: Phase=baseline, order=1.0, staff=+0, price=1.0
   Completed 9/12: supply_crisis seed=123 ÔåÆ 19,155
   Day 1: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 2: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 3: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 4: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 5: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 6: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 7: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 8: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 9: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 10: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 11: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 12: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 13: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 14: Phase=tourist_surge, order=1.0, staff=+3, price=1.15
+  Day 15: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 16: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 17: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 18: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 19: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 20: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 21: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 22: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 23: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 24: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 25: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 26: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 27: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 28: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 29: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 30: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Completed 10/12: tourist_season seed=42 ÔåÆ 12,898
+  Day 1: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 2: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 3: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 4: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 5: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 6: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 7: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 8: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 9: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 10: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 11: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 12: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 13: Phase=tourist_surge, order=1.0, staff=+3, price=1.15
+  Day 14: Phase=tourist_surge, order=1.0, staff=+3, price=1.15
+  Day 15: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 16: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 17: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 18: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 19: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 20: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 21: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 22: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 23: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 24: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 25: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 26: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 27: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 28: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 29: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Day 30: Phase=tourist_crash, order=0.4, staff=-2, price=0.9
+  Completed 11/12: tourist_season seed=88 ÔåÆ 41,202
+  Day 1: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 2: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 3: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 4: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 5: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 6: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 7: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 8: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 9: Phase=tourist_surge, order=1.0, staff=+3, price=1.15
+  Day 10: Phase=tourist_surge, order=1.0, staff=+3, price=1.15
+  FAILED (tourist_season seed=123): [WinError 10054] An existing connection was forcibly closed by the remote host
+  Completed 12/12: tourist_season seed=123 ÔåÆ -100,000
+
+
+================================================================================
+  EVALUATION REPORT ÔÇö my_agent
+================================================================================
+
+Scenario               Seed      Score     Profit    Walk       Rep  Days Status    
+--------------------------------------------------------------------------------
+baseline                 42      10886      11447     397         0    30 completed 
+baseline                 88      15781      16326     360         0    30 completed 
+baseline                123      17211      18136     780        22    30 completed 
+renovation               42       5477       6209     572         0    30 completed 
+renovation               88       9400       9948     368         0    30 completed 
+renovation              123      12298      13124     706         0    30 completed 
+supply_crisis            42       5341       6184     618        79    30 completed 
+supply_crisis            88       9116      10147     847        12    30 completed 
+supply_crisis           123      19155      20198     921         0    30 completed 
+tourist_season           42      12898      13955     908         4    30 completed 
+tourist_season           88      41202      42189     928         1    30 completed 
+tourist_season          123    -100000          0       0         0     0 error     
+
+Scenario              Avg Score        Min        Max  Games
+------------------------------------------------------------
+baseline                  14626      10886      17211      3
+renovation                 9058       5477      12298      3
+supply_crisis             11204       5341      19155      3
+tourist_season           -15300    -100000      41202      3
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  Games played:    12
+  Bankruptcies:    0
+  Errors:          1
+  Average score:   4,897
+  Best scenario:   baseline
+  Worst scenario:  tourist_season
+
+  *** FINAL SCORE: 4,897 ***
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ

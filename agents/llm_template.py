@@ -19,7 +19,7 @@ import litellm
 
 from agents.runner import run_game
 
-MODEL = os.getenv("AGENT_MODEL", "openai/gpt-4.1-mini")
+MODEL = os.getenv("AGENT_MODEL", "openai/gpt-4.1")
 
 SYSTEM_PROMPT = """\
 You manage an Italian restaurant for 30 simulated days. Each day you receive
