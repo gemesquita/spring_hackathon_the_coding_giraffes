@@ -88,4 +88,4 @@ if __name__ == "__main__":
         sys.exit(1)
     print(f"Using model: {MODEL}")
     print(f"Using proxy: {client.base_url}")
-    result = run_game(strategy, team_name="my_agent", seed=42)
+    result = run_game(strategy, team_name="The Coding Giraffes", seed=42)
