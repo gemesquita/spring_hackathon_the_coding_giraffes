@@ -15,37 +15,38 @@ Test after changes:
 # =============================================================================
 
 ORDERING = {
-    # Day 1 bulk orders
-    "day1_bulk_normal": 25,      # kg per ingredient on Day 1
+    # Day 1 bulk orders (must be >= supplier minimums, typically 10kg)
+    "day1_bulk_normal": 20,      # kg per ingredient on Day 1 (reduced to avoid over-ordering)
     "day1_bulk_reduced": 12,     # kg when reduced capacity detected
     
     # Early week boost (Days 2-3)
     "early_week_days": [2, 3],
-    "early_week_threshold": 35,  # Order if total < this
-    "early_week_qty": 15,
+    "early_week_threshold": 30,  # Order if total < this (lowered)
+    "early_week_qty": 12,        # Smaller orders (was 15)
     
     # Stockout recovery
-    "stockout_qty": 15,
+    "stockout_qty": 12,          # Emergency order (was 15)
     
     # Smart restock thresholds
-    "base_threshold": 15.0,
+    "base_threshold": 12.0,      # Lower threshold (was 15)
     "day_multipliers": {
-        "Monday": 2.5, "Tuesday": 2.0, "Wednesday": 1.8,
-        "Thursday": 1.5, "Friday": 1.2, "Saturday": 1.0, "Sunday": 1.0
+        "Monday": 2.0, "Tuesday": 1.8, "Wednesday": 1.5,
+        "Thursday": 1.3, "Friday": 1.0, "Saturday": 1.0, "Sunday": 1.0
     },
-    "default_daily_usage": 2.5,
-    "restock_days_supply": 6,
-    "min_order_qty": 15,
+    "default_daily_usage": 2.0,  # Lower estimate
+    "restock_days_supply": 5,    # Less buffer (was 6)
+    "min_order_qty": 10,         # MUST match supplier minimum (Italian Imports = 10kg)
+    "supplier_min_order": 10,    # Global supplier minimum to respect
     
     # Expiring stock
     "expiry_days_threshold": 2,
     "expiry_remaining_threshold": 5,
-    "expiry_order_qty": 15,
+    "expiry_order_qty": 12,      # Smaller (was 15)
     
     # Weekend prep (Wednesday)
-    "weekend_multiplier": 4.5,
-    "weekend_min_order": 20,
-    "weekend_buffer": 10,
+    "weekend_multiplier": 3.5,   # Lower (was 4.5)
+    "weekend_min_order": 15,     # Lower (was 20)
+    "weekend_buffer": 5,         # Lower (was 10)
 }
 
 # =============================================================================
@@ -55,7 +56,7 @@ ORDERING = {
 STAFFING = {
     "base_levels": {
         "Monday": 7, "Tuesday": 7, "Wednesday": 8,
-        "Thursday": 9, "Friday": 12, "Saturday": 13, "Sunday": 5
+        "Thursday": 9, "Friday": 13, "Saturday": 14, "Sunday": 5
     },
     "covers_per_staff": 15,
     "day_weight": 0.6,
@@ -217,4 +218,38 @@ DEMAND = {
     "Thursday": {"min": 100, "expected": 135, "max": 165},
     "Friday": {"min": 140, "expected": 200, "max": 260},
     "Saturday": {"min": 150, "expected": 220, "max": 280},
+}
+
+# =============================================================================
+# STATE MACHINE SCENARIO MULTIPLIERS
+# =============================================================================
+# These are the EXACT multipliers for each scenario phase.
+# Key insight: During SURGE (days 9-14), order_multiplier is 1.0 NOT 2.5
+# because we already pre-stocked on days 5-8. Ordering 2.5x during surge
+# causes waste when the crash hits on day 15.
+
+SCENARIO_MULTIPLIERS = {
+    "baseline": {"order": 1.0, "staff": 0, "price": 1.0},
+    "renovation": {"order": 0.5, "staff": -3, "price": 0.95},
+    "supply_crisis": {"order": 1.5, "staff": 0, "price": 1.0},
+    "tourist_normal": {"order": 1.0, "staff": 0, "price": 1.0},
+    "tourist_prestock": {"order": 2.5, "staff": 0, "price": 1.0},   # Days 5-8: PRE-STOCK
+    "tourist_surge": {"order": 1.0, "staff": 3, "price": 1.15},     # Days 9-14: Already stocked!
+    "tourist_crash": {"order": 0.4, "staff": -2, "price": 0.9},     # Days 15+: Scale down
+}
+
+# =============================================================================
+# DAY-OF-WEEK MODIFIERS (applied ON TOP of scenario multipliers)
+# =============================================================================
+# These boost revenue on high-demand days without changing the scenario phase.
+# Price premiums require reputation check before applying.
+
+DAY_OF_WEEK_MODIFIERS = {
+    "Sunday": {"order": 0.3, "staff": 0, "price": 1.0},      # Closed - minimal
+    "Monday": {"order": 1.0, "staff": 0, "price": 1.0},      # Low demand
+    "Tuesday": {"order": 1.0, "staff": 0, "price": 1.0},     # Low demand
+    "Wednesday": {"order": 1.2, "staff": 0, "price": 1.0},   # Prep for weekend
+    "Thursday": {"order": 1.1, "staff": 0, "price": 1.0},    # Building up
+    "Friday": {"order": 1.0, "staff": 1, "price": 1.08},     # HIGH demand - premium
+    "Saturday": {"order": 1.0, "staff": 2, "price": 1.08},   # HIGHEST demand - premium
 }

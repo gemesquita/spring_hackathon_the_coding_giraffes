@@ -1,0 +1,73 @@
+Running Hybrid Agent (seed=42, scenario=baseline)
+============================================================
+Game 47d52072-a3a1-4df1-9a13-b050715e248b created ù Day 1, Cash: 15000.0
+  Day 1: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 1: covers=92, revenue=1704.0, cash=14320, actions=21ok/0rej
+  Day 2: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 2: covers=98, revenue=1740.5, cash=14920, actions=12ok/0rej
+  Day 3: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 3: covers=104, revenue=1751.5, cash=14672, actions=17ok/0rej
+  Day 4: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 4: covers=151, revenue=2790.0, cash=15691, actions=16ok/0rej
+  Day 5: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 5: covers=259, revenue=4924.0, cash=18005, actions=15ok/0rej
+  Day 6: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 6: covers=0, revenue=0.0, cash=15195, actions=16ok/0rej
+  Day 7: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 7: covers=0, revenue=0.0, cash=13941, actions=16ok/0rej
+  Day 8: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 8: covers=76, revenue=1473.0, cash=13720, actions=13ok/0rej
+  Day 9: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 9: covers=102, revenue=1913.0, cash=13274, actions=17ok/0rej
+  Day 10: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 10: covers=132, revenue=2256.0, cash=13865, actions=14ok/0rej
+  Day 11: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 11: covers=118, revenue=2158.0, cash=14454, actions=13ok/0rej
+  Day 12: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 12: covers=200, revenue=3566.0, cash=15832, actions=15ok/0rej
+  Day 13: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 13: covers=192, revenue=3604.5, cash=17298, actions=14ok/0rej
+  Day 14: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 14: covers=0, revenue=0.0, cash=15428, actions=14ok/0rej
+  Day 15: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 15: covers=70, revenue=1402.0, cash=15015, actions=17ok/0rej
+  Day 16: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 16: covers=81, revenue=1661.0, cash=14516, actions=15ok/0rej
+  Day 17: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 17: covers=70, revenue=1199.0, cash=14255, actions=15ok/0rej
+  Day 18: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 18: covers=194, revenue=3721.0, cash=16149, actions=16ok/0rej
+  Day 19: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 19: covers=109, revenue=2111.0, cash=15854, actions=16ok/0rej
+  Day 20: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 20: covers=97, revenue=1986.0, cash=15497, actions=14ok/0rej
+  Day 21: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 21: covers=0, revenue=0.0, cash=14118, actions=15ok/0rej
+  Day 22: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 22: covers=75, revenue=1478.0, cash=13813, actions=16ok/0rej
+  Day 23: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 23: covers=96, revenue=1830.0, cash=13610, actions=14ok/0rej
+  Day 24: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 24: covers=112, revenue=1905.5, cash=13641, actions=15ok/0rej
+  Day 25: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 25: covers=98, revenue=1758.5, cash=13788, actions=12ok/0rej
+  Day 26: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 26: covers=205, revenue=3612.5, cash=15359, actions=13ok/0rej
+  Day 27: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 27: covers=215, revenue=3831.5, cash=16909, actions=14ok/0rej
+  Day 28: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 28: covers=90, revenue=1438.5, cash=16287, actions=13ok/0rej
+  Day 29: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 29: covers=66, revenue=1269.0, cash=15594, actions=19ok/0rej
+  Day 30: Phase=baseline, order=1.0, staff=+0, price=1.0
+  Day 30: covers=126, revenue=2255.0, cash=15713, actions=16ok/0rej
+Game ended: completed
+
+Final score: -536.37
+  Net profit: 713.45
+  Satisfaction penalty: 0.0
+  Reputation penalty: 108.84
+  Walkout penalty: 943.0
+  Waste penalty: 197.98
+  Days survived: 30
+  Final cash: 15713.45
