@@ -109,7 +109,112 @@ MARKETING = {
 # =============================================================================
 
 DETECTION = {
-    "capacity_keywords": ["renovation", "capacity", "table"],
+    "capacity_keywords": ["renovation", "capacity", "table", "construction"],
+    "supply_crisis_keywords": ["halted", "outage", "unavailable", "crisis", "stopped"],
     "low_covers_threshold": 80,
     "low_covers_after_day": 5,
+}
+
+# =============================================================================
+# TOURIST SEASON PARAMETERS
+# =============================================================================
+
+TOURIST_SEASON = {
+    # Surge detection
+    "surge_start_day": 9,
+    "surge_end_day": 14,
+    "surge_covers_threshold": 250,  # Covers indicating surge
+    
+    # Pre-stocking (days 5-8)
+    "prestock_start_day": 5,
+    "prestock_end_day": 8,
+    "prestock_multiplier": 1.8,  # Order 80% more
+    
+    # During surge (days 9-14)
+    "surge_order_multiplier": 1.5,
+    "surge_staff_boost": 3,  # Add 3 staff during surge
+    "surge_price_premium": 1.12,  # 12% premium during surge
+    
+    # Post-surge (days 15+)
+    "postsurge_order_multiplier": 0.7,
+    "postsurge_staff_reduction": 2,
+    
+    # Expected demand by phase
+    "normal_covers_range": (100, 200),
+    "surge_covers_range": (300, 470),
+    "drop_covers_range": (50, 180),
+}
+
+# =============================================================================
+# SUPPLY CRISIS PARAMETERS
+# =============================================================================
+
+SUPPLY_CRISIS = {
+    # Detection
+    "crisis_keywords": ["halted", "outage", "unavailable", "stopped", "suspended"],
+    
+    # Response
+    "emergency_order_multiplier": 1.5,  # Order extra from remaining suppliers
+    "buffer_days": 4,  # Days of extra stock to maintain
+    
+    # Alternative supplier priority (lower = higher priority)
+    "supplier_priority": {
+        "Fresh Farms NL": 1,
+        "Italian Imports": 2,
+        "Local Produce": 3,
+        "Premium Goods": 4,
+    },
+}
+
+# =============================================================================
+# RENOVATION PARAMETERS
+# =============================================================================
+
+RENOVATION = {
+    "duration_days": 14,
+    "capacity_reduction": 0.5,  # 50% capacity
+    "order_multiplier": 0.6,  # 60% of normal orders
+    "staff_reduction": 3,
+    "starting_cash": 17000,  # Extra cash for renovation scenario
+}
+
+# =============================================================================
+# PROBABILITY & RISK PARAMETERS
+# =============================================================================
+
+RISK = {
+    # Cash safety thresholds
+    "bankruptcy_critical": 3000,
+    "bankruptcy_danger": 5000,
+    "bankruptcy_caution": 8000,
+    "healthy_cash": 12000,
+    
+    # Stockout risk
+    "stockout_buffer_multiplier": 1.3,  # 30% buffer above expected usage
+    "emergency_restock_threshold": 3.0,  # kg below which is critical
+    
+    # Walkout cost estimates
+    "walkout_direct_cost": 20,  # Lost revenue per walkout
+    "walkout_review_cost": 15,  # Reputation damage
+    
+    # Waste cost
+    "waste_cost_per_kg": 2.0,
+    
+    # Staff efficiency
+    "covers_per_staff": 15,
+    "diminishing_returns_threshold": 12,  # Staff above this has reduced efficiency
+}
+
+# =============================================================================
+# DEMAND EXPECTATIONS BY DAY
+# =============================================================================
+
+DEMAND = {
+    "Sunday": {"min": 0, "expected": 0, "max": 0},
+    "Monday": {"min": 70, "expected": 85, "max": 110},
+    "Tuesday": {"min": 75, "expected": 90, "max": 115},
+    "Wednesday": {"min": 90, "expected": 120, "max": 150},
+    "Thursday": {"min": 100, "expected": 135, "max": 165},
+    "Friday": {"min": 140, "expected": 200, "max": 260},
+    "Saturday": {"min": 150, "expected": 220, "max": 280},
 }

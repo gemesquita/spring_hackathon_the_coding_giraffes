@@ -65,10 +65,41 @@ def load_strategy(module_path: str):
     return mod.strategy
 
 
-MAX_PARALLEL = 10
+MAX_PARALLEL = 3  # Reduced from 10 to avoid 429 rate limiting errors
 
 
-def _run_one(
+def _run_one_with_retry(
+    strategy,
+    scenario: str,
+    seed: int,
+    base_url: str,
+    team_name: str,
+    verbose: bool,
+    label: str,
+    max_retries: int = 3,
+) -> dict:
+    """Run a single game with exponential backoff retry on rate limiting."""
+    import random
+    
+    for attempt in range(max_retries):
+        try:
+            return _run_one_inner(
+                strategy, scenario, seed, base_url, team_name, verbose, label
+            )
+        except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "Too Many Requests" in error_str:
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) + random.uniform(0, 1)
+                    print(f"  Rate limited, waiting {wait_time:.1f}s before retry {attempt + 2}/{max_retries}...")
+                    import time
+                    time.sleep(wait_time)
+                    continue
+            raise
+    return _run_one_inner(strategy, scenario, seed, base_url, team_name, verbose, label)
+
+
+def _run_one_inner(
     strategy,
     scenario: str,
     seed: int,
@@ -77,6 +108,7 @@ def _run_one(
     verbose: bool,
     label: str,
 ) -> dict:
+    """Inner function that actually runs a single game."""
     if verbose:
         print(f"\n{'=' * 60}")
         print(label)
@@ -120,6 +152,21 @@ def _run_one(
             "waste_pen": 0,
             "status": "error",
         }
+
+
+def _run_one(
+    strategy,
+    scenario: str,
+    seed: int,
+    base_url: str,
+    team_name: str,
+    verbose: bool,
+    label: str,
+) -> dict:
+    """Wrapper that uses retry logic for rate limiting resilience."""
+    return _run_one_with_retry(
+        strategy, scenario, seed, base_url, team_name, verbose, label
+    )
 
 
 def evaluate(
