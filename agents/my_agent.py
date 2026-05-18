@@ -15,6 +15,7 @@ import os
 import sys
 
 from agents.runner import run_game
+from agents.config import ORDERING, STAFFING, PRICING, MARKETING, DETECTION
 
 
 # =============================================================================
@@ -113,7 +114,8 @@ def day_one_bulk_order(obs: dict) -> list[dict]:
         if ing in supplier_map:
             orders.append({
                 "tool": "place_order",
-                "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": 25}
+                "args": {"supplier": supplier_map[ing], "ingredient": ing, 
+                         "quantity_kg": ORDERING["day1_bulk_normal"]}
             })
     
     return orders
@@ -126,7 +128,7 @@ def early_week_boost(obs: dict, day: int) -> list[dict]:
     - Day 1 orders might not arrive until Day 3-5
     - Starting inventory is limited
     """
-    if day not in (2, 3):
+    if day not in ORDERING["early_week_days"]:
         return []
     
     supplier_map = build_supplier_map(obs)
@@ -141,7 +143,7 @@ def early_week_boost(obs: dict, day: int) -> list[dict]:
             for ing in dish.get("ingredients", []):
                 needed.add(ing["ingredient"])
     
-    # Order 15kg of anything below 25kg total available
+    # Order if below threshold
     for ing in sorted(needed):
         current = inventory.get(ing, 0)
         pending = sum(
@@ -150,10 +152,11 @@ def early_week_boost(obs: dict, day: int) -> list[dict]:
         )
         total = current + pending
         
-        if total < 35 and ing in supplier_map:  # Need ~35kg to cover week 1
+        if total < ORDERING["early_week_threshold"] and ing in supplier_map:
             orders.append({
                 "tool": "place_order",
-                "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": 15}
+                "args": {"supplier": supplier_map[ing], "ingredient": ing, 
+                         "quantity_kg": ORDERING["early_week_qty"]}
             })
     
     return orders
@@ -181,19 +184,23 @@ def stockout_recovery(obs: dict) -> list[dict]:
             if ing_name in supplier_map and ing_name not in pending and ing_name not in ordered_ingredients:
                 orders.append({
                     "tool": "place_order",
-                    "args": {"supplier": supplier_map[ing_name], "ingredient": ing_name, "quantity_kg": 15}
+                    "args": {"supplier": supplier_map[ing_name], "ingredient": ing_name, 
+                             "quantity_kg": ORDERING["stockout_qty"]}
                 })
                 ordered_ingredients.add(ing_name)
     
     return orders
 
 
-def smart_restock(obs: dict, base_threshold: float = 15.0) -> list[dict]:
+def smart_restock(obs: dict, base_threshold: float = None) -> list[dict]:
     """Order ingredients when total available (stock + pending) falls below threshold.
     
     Consider TOTAL available (current + pending), not just current.
     This prevents over-ordering while ensuring we always have stock.
     """
+    if base_threshold is None:
+        base_threshold = ORDERING["base_threshold"]
+    
     supplier_map = build_supplier_map(obs)
     inventory = get_inventory_levels(obs)
     usage = get_menu_ingredients(obs)
@@ -202,11 +209,7 @@ def smart_restock(obs: dict, base_threshold: float = 15.0) -> list[dict]:
     orders = []
     
     # Adjust threshold based on day - HIGHER early week for weekend prep
-    day_multipliers = {
-        "Monday": 2.5, "Tuesday": 2.0, "Wednesday": 1.8,
-        "Thursday": 1.5, "Friday": 1.2, "Saturday": 1.0, "Sunday": 1.0
-    }
-    multiplier = day_multipliers.get(day_of_week, 1.0)
+    multiplier = ORDERING["day_multipliers"].get(day_of_week, 1.0)
     effective_threshold = base_threshold * multiplier
     
     # Check all ingredients from menu
@@ -224,13 +227,14 @@ def smart_restock(obs: dict, base_threshold: float = 15.0) -> list[dict]:
         )
         total_available = current_stock + pending_qty
         
-        # Use actual usage if known, else default to 2.5kg/day
-        daily_use = usage.get(ing, 2.5)
+        # Use actual usage if known, else default
+        daily_use = usage.get(ing, ORDERING["default_daily_usage"])
         
         # Order if TOTAL available is below threshold
         if total_available < effective_threshold and ing in supplier_map:
-            # Order enough for ~6 days of usage, minimum 15kg
-            order_qty = max(15, round(daily_use * 6))
+            # Order enough for configured days of supply
+            order_qty = max(ORDERING["min_order_qty"], 
+                          round(daily_use * ORDERING["restock_days_supply"]))
             orders.append({
                 "tool": "place_order",
                 "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": order_qty}
@@ -252,14 +256,15 @@ def expiring_stock_orders(obs: dict) -> list[dict]:
         # Check if significant stock is expiring soon
         expiring_soon = sum(
             b["quantity_kg"] for b in batches 
-            if b.get("expires_in_days", 99) <= 2
+            if b.get("expires_in_days", 99) <= ORDERING["expiry_days_threshold"]
         )
         remaining = item["total_kg"] - expiring_soon
         
-        if remaining < 5 and ing not in pending and ing in supplier_map:
+        if remaining < ORDERING["expiry_remaining_threshold"] and ing not in pending and ing in supplier_map:
             orders.append({
                 "tool": "place_order",
-                "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": 15}
+                "args": {"supplier": supplier_map[ing], "ingredient": ing, 
+                         "quantity_kg": ORDERING["expiry_order_qty"]}
             })
     
     return orders
@@ -287,9 +292,6 @@ def weekend_prep_orders(obs: dict) -> list[dict]:
     orders = []
     
     # For weekend, need stock for Fri + Sat + Sun = 3 days of high demand
-    # Weekend demand is ~1.5x weekday
-    weekend_multiplier = 4.5  # 3 days * 1.5x demand
-    
     for ing, daily_use in usage.items():
         current = inventory.get(ing, 0)
         pending_qty = sum(
@@ -298,10 +300,11 @@ def weekend_prep_orders(obs: dict) -> list[dict]:
         )
         total_available = current + pending_qty
         
-        weekend_need = daily_use * weekend_multiplier
+        weekend_need = daily_use * ORDERING["weekend_multiplier"]
         
         if total_available < weekend_need and ing in supplier_map and ing not in pending:
-            order_qty = max(20, round(weekend_need - total_available + 10))  # Extra buffer
+            order_qty = max(ORDERING["weekend_min_order"], 
+                          round(weekend_need - total_available + ORDERING["weekend_buffer"]))
             orders.append({
                 "tool": "place_order",
                 "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": order_qty}
@@ -329,48 +332,44 @@ def get_staff_action(obs: dict) -> dict:
     alerts = obs.get("alerts", [])
     
     # Check for capacity-reducing alerts (renovation scenario)
-    reduced_capacity = any("renovation" in str(a).lower() or "capacity" in str(a).lower() 
-                          for a in alerts)
+    reduced_capacity = any(kw in str(a).lower() for a in alerts 
+                          for kw in DETECTION["capacity_keywords"])
     
     # Base levels by day of week
-    base_levels = {
-        "Monday": 7, "Tuesday": 7,
-        "Wednesday": 8, "Thursday": 9,
-        "Friday": 12, "Saturday": 13, "Sunday": 5
-    }
-    level = base_levels.get(day_of_week, 8)
+    level = STAFFING["base_levels"].get(day_of_week, 8)
     
     # ADAPTIVE: Scale staff based on yesterday's actual covers
-    # ~15 covers per staff member is efficient
     if yesterday_covers > 0:
-        suggested_staff = max(5, min(14, (yesterday_covers // 15) + 2))
-        # Blend: 60% day-based, 40% performance-based
-        level = round(level * 0.6 + suggested_staff * 0.4)
+        suggested_staff = max(STAFFING["min_staff"], 
+                            min(STAFFING["max_staff"], 
+                                (yesterday_covers // STAFFING["covers_per_staff"]) + 2))
+        # Blend day-based and performance-based
+        level = round(level * STAFFING["day_weight"] + suggested_staff * STAFFING["demand_weight"])
     
     # If reduced capacity (renovation), cut staff
     if reduced_capacity:
-        level = max(5, level - 3)
+        level = max(STAFFING["min_staff"], level - STAFFING["reduced_capacity_cut"])
     
     # Weather adjustments
     if weather in ("rainy", "stormy"):
-        level -= 1
+        level -= STAFFING["bad_weather_cut"]
     elif weather == "sunny" and day_of_week in ("Friday", "Saturday"):
-        level += 1
+        level += STAFFING["sunny_weekend_boost"]
     
     # Walkout recovery
     if walkout_band == "Many":
-        level += 2
+        level += STAFFING["walkout_many_boost"]
     elif walkout_band == "Some":
-        level += 1
+        level += STAFFING["walkout_some_boost"]
     
     # Cash safety
-    if cash < 5000:
-        level = max(level - 2, 5)
-    elif cash < 8000:
-        level = max(level - 1, 6)
+    if cash < STAFFING["cash_critical"]:
+        level = max(level - STAFFING["critical_cut"], STAFFING["min_staff"])
+    elif cash < STAFFING["cash_warning"]:
+        level = max(level - STAFFING["warning_cut"], STAFFING["min_staff"] + 1)
     
     # Clamp to valid range
-    level = max(5, min(14, level))
+    level = max(STAFFING["min_staff"], min(STAFFING["max_staff"], level))
     
     return {"tool": "set_staff_level", "args": {"level": level}}
 
@@ -433,23 +432,23 @@ def get_pricing_actions(obs: dict) -> list[dict]:
     menu_book = {d["name"]: d for d in obs.get("menu_book", [])}
     
     # Only adjust prices if reputation is good enough
-    if reputation in ("Good", "Very Good", "Excellent"):
+    if reputation in PRICING["good_reputations"]:
         # Weekend premium
         if day_of_week in ("Friday", "Saturday"):
             for dish_name, dish in menu_book.items():
                 if dish.get("is_active"):
                     base_price = dish["base_price"]
-                    new_price = round(base_price * 1.1, 2)  # 10% weekend premium
+                    new_price = round(base_price * PRICING["weekend_premium"], 2)
                     actions.append({
                         "tool": "set_price",
                         "args": {"dish": dish_name, "price": new_price}
                     })
-    elif reputation in ("Poor", "Fair"):
+    elif reputation in PRICING["poor_reputations"]:
         # Discount to attract customers when reputation is low
         for dish_name, dish in menu_book.items():
             if dish.get("is_active"):
                 base_price = dish["base_price"]
-                new_price = round(base_price * 0.9, 2)  # 10% discount
+                new_price = round(base_price * PRICING["poor_rep_discount"], 2)
                 actions.append({
                     "tool": "set_price",
                     "args": {"dish": dish_name, "price": new_price}
@@ -470,42 +469,75 @@ def get_marketing_action(obs: dict) -> dict | None:
     customer_trend = obs.get("customer_trend", "Stable")
     
     # Don't spend if cash is tight
-    if cash < 5000:
+    if cash < MARKETING["min_cash"]:
         return None
     
     # Boost marketing on slower days or when trend is declining
     if customer_trend == "Declining":
-        return {"tool": "set_marketing_spend", "args": {"amount": 200}}
+        return {"tool": "set_marketing_spend", "args": {"amount": MARKETING["declining_amount"]}}
     
-    if day_of_week in ("Monday", "Tuesday") and reputation not in ("Poor", "Fair"):
-        return {"tool": "set_marketing_spend", "args": {"amount": 100}}
+    if day_of_week in MARKETING["slow_days"] and reputation not in PRICING["poor_reputations"]:
+        return {"tool": "set_marketing_spend", "args": {"amount": MARKETING["slow_day_amount"]}}
     
     return None
+
+
+# =============================================================================
+# NOTES SYSTEM - Persist state across days
+# =============================================================================
+
+def parse_notes(notes: str) -> dict:
+    """Parse notes string into key-value pairs. Format: KEY:VALUE;KEY2:VALUE2"""
+    result = {}
+    if not notes:
+        return result
+    for part in notes.split(";"):
+        if ":" in part:
+            key, val = part.split(":", 1)
+            result[key.strip()] = val.strip()
+    return result
+
+
+def build_notes(data: dict) -> str:
+    """Build notes string from key-value pairs."""
+    return ";".join(f"{k}:{v}" for k, v in data.items())
 
 
 # =============================================================================
 # MAIN STRATEGY FUNCTION
 # =============================================================================
 
-def is_reduced_capacity(observation: dict, day: int) -> bool:
-    """Detect if we're in a reduced capacity scenario (renovation, etc.)."""
+def is_reduced_capacity(observation: dict, day: int) -> tuple[bool, int]:
+    """Detect if we're in a reduced capacity scenario (renovation, etc.).
+    
+    Returns: (is_reduced, remaining_days)
+    """
     alerts = observation.get("alerts", [])
     alert_text = " ".join(str(a).lower() for a in alerts)
+    notes = parse_notes(observation.get("notes", ""))
     
-    # Check for renovation/capacity keywords
-    if "renovation" in alert_text or "capacity" in alert_text or "table" in alert_text:
-        return True
+    # Check for NEW renovation alert (Day 1)
+    if any(kw in alert_text for kw in DETECTION["capacity_keywords"]):
+        # "two weeks" = 14 days of renovation
+        if "two week" in alert_text or "2 week" in alert_text:
+            return True, 14
+        return True, 7  # Default to 1 week if unclear
     
-    # Also detect by checking yesterday's covers vs expected
-    # If covers are consistently <80 on what should be busy days, something's wrong
+    # Check persisted renovation state from notes
+    if "RENO" in notes:
+        remaining = int(notes.get("RENO", 0))
+        if remaining > 0:
+            return True, remaining
+    
+    # Fallback: detect by low covers on busy days
     ss = observation.get("service_summary") or {}
     covers = ss.get("total_covers", 100)
     dow = observation.get("day_of_week", "Monday")
     
-    if dow in ("Friday", "Saturday") and covers < 80 and day > 5:
-        return True
+    if dow in ("Friday", "Saturday") and covers < DETECTION["low_covers_threshold"] and day > DETECTION["low_covers_after_day"]:
+        return True, 7  # Assume 1 week remaining
     
-    return False
+    return False, 0
 
 
 def strategy(observation: dict, day: int) -> list[dict]:
@@ -519,7 +551,14 @@ def strategy(observation: dict, day: int) -> list[dict]:
     """
     actions = []
     cash = observation.get("cash", 15000)
-    reduced = is_reduced_capacity(observation, day)
+    reduced, reno_remaining = is_reduced_capacity(observation, day)
+    
+    # Parse existing notes and update renovation counter
+    notes_data = parse_notes(observation.get("notes", ""))
+    if reduced and reno_remaining > 0:
+        notes_data["RENO"] = str(reno_remaining - 1)  # Decrement for tomorrow
+    elif "RENO" in notes_data and int(notes_data.get("RENO", 0)) <= 0:
+        del notes_data["RENO"]  # Clear expired renovation state
     
     # 1. ORDERING (Code-based, reliable)
     # Reduce quantities if in reduced capacity mode
@@ -548,11 +587,11 @@ def strategy(observation: dict, day: int) -> list[dict]:
     # 4. PRICING - Weekend premium when reputation allows
     day_of_week = observation.get("day_of_week", "Monday")
     reputation = observation.get("reputation_band", "Good")
-    if day_of_week in ("Friday", "Saturday") and reputation in ("Good", "Very Good", "Excellent"):
+    if day_of_week in ("Friday", "Saturday") and reputation in PRICING["good_reputations"]:
         actions.extend(get_pricing_actions(observation))
     
     # 5. MARKETING - Only when cash is healthy and not in reduced capacity
-    if day_of_week in ("Monday", "Tuesday") and cash > 12000 and not reduced:
+    if day_of_week in MARKETING["slow_days"] and cash > MARKETING["min_cash_for_promo"] and not reduced:
         marketing = get_marketing_action(observation)
         if marketing:
             actions.append(marketing)
@@ -572,11 +611,15 @@ def strategy(observation: dict, day: int) -> list[dict]:
         else:
             final_actions.append(action)
     
+    # Save notes for next day (persist renovation state, etc.)
+    if notes_data:
+        final_actions.append({"tool": "save_notes", "args": {"text": build_notes(notes_data)}})
+    
     return final_actions
 
 
 def day_one_bulk_order_reduced(obs: dict) -> list[dict]:
-    """Day 1 for reduced capacity: Order only 12kg each (half normal)."""
+    """Day 1 for reduced capacity: Order smaller quantities."""
     supplier_map = build_supplier_map(obs)
     orders = []
     
@@ -590,7 +633,8 @@ def day_one_bulk_order_reduced(obs: dict) -> list[dict]:
         if ing in supplier_map:
             orders.append({
                 "tool": "place_order",
-                "args": {"supplier": supplier_map[ing], "ingredient": ing, "quantity_kg": 12}
+                "args": {"supplier": supplier_map[ing], "ingredient": ing, 
+                         "quantity_kg": ORDERING["day1_bulk_reduced"]}
             })
     
     return orders
@@ -599,6 +643,8 @@ def day_one_bulk_order_reduced(obs: dict) -> list[dict]:
 if __name__ == "__main__":
     import sys
     seed = int(sys.argv[1]) if len(sys.argv) > 1 else 42
-    print(f"Running Hybrid Agent (seed={seed})")
+    scenario = sys.argv[2] if len(sys.argv) > 2 else "baseline"
+    print(f"Running Hybrid Agent (seed={seed}, scenario={scenario})")
     print("=" * 60)
-    result = run_game(strategy, team_name="The_Coding_Giraffes", seed=seed)
+    result = run_game(strategy, team_name="The_Coding_Giraffes", 
+                      scenario=scenario, seed=seed)
