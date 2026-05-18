@@ -488,16 +488,24 @@ def get_marketing_action(obs: dict) -> dict | None:
 # =============================================================================
 
 def is_reduced_capacity(observation: dict, day: int) -> bool:
-    """Detect if we're in a reduced capacity scenario (renovation, etc.)."""
+    """Detect if we're in a reduced capacity scenario (renovation, etc.).
+    
+    Uses notes to persist detection across days since alerts are transient.
+    """
+    notes = observation.get("notes", "") or ""
+    
+    # Check if we already detected reduced capacity (saved in notes)
+    if "REDUCED_CAPACITY" in notes:
+        return True
+    
     alerts = observation.get("alerts", [])
     alert_text = " ".join(str(a).lower() for a in alerts)
     
-    # Check for renovation/capacity keywords
+    # Check for renovation/capacity keywords in current alerts
     if "renovation" in alert_text or "capacity" in alert_text or "table" in alert_text:
         return True
     
     # Also detect by checking yesterday's covers vs expected
-    # If covers are consistently <80 on what should be busy days, something's wrong
     ss = observation.get("service_summary") or {}
     covers = ss.get("total_covers", 100)
     dow = observation.get("day_of_week", "Monday")
@@ -506,6 +514,35 @@ def is_reduced_capacity(observation: dict, day: int) -> bool:
         return True
     
     return False
+
+
+def get_notes_action(observation: dict, day: int) -> dict | None:
+    """Save important state to notes for persistence across days."""
+    notes = observation.get("notes", "") or ""
+    alerts = observation.get("alerts", [])
+    alert_text = " ".join(str(a).lower() for a in alerts)
+    
+    new_notes_parts = []
+    
+    # Detect and save reduced capacity state
+    if "renovation" in alert_text or "capacity" in alert_text:
+        if "REDUCED_CAPACITY" not in notes:
+            new_notes_parts.append("REDUCED_CAPACITY")
+    elif "REDUCED_CAPACITY" in notes:
+        new_notes_parts.append("REDUCED_CAPACITY")  # Keep it
+    
+    # Detect and save supply crisis state
+    if "halted" in alert_text or "outage" in alert_text or "supplier" in alert_text:
+        if "SUPPLY_CRISIS" not in notes:
+            new_notes_parts.append("SUPPLY_CRISIS")
+    elif "SUPPLY_CRISIS" in notes:
+        new_notes_parts.append("SUPPLY_CRISIS")  # Keep it
+    
+    if new_notes_parts:
+        new_notes = " | ".join(new_notes_parts) + f" | Day {day}"
+        return {"tool": "save_notes", "args": {"text": new_notes}}
+    
+    return None
 
 
 def strategy(observation: dict, day: int) -> list[dict]:
@@ -556,6 +593,11 @@ def strategy(observation: dict, day: int) -> list[dict]:
         marketing = get_marketing_action(observation)
         if marketing:
             actions.append(marketing)
+    
+    # 6. SAVE NOTES - Persist important state
+    notes_action = get_notes_action(observation, day)
+    if notes_action:
+        actions.append(notes_action)
     
     # Remove any None values
     actions = [a for a in actions if a is not None]
