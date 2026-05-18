@@ -327,3 +327,5 @@ Per team: max **10 concurrent games** and **60 games per hour**. Exceeding eithe
 ---
 
 Good luck. Go feed some customers.
+
+HIII GIRAFFESS!
